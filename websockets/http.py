@@ -7,7 +7,6 @@ imported from :mod:`websockets.http`.
 
 """
 
-import asyncio
 import email.parser
 import io
 import sys
@@ -26,8 +25,7 @@ USER_AGENT = ' '.join((
 ))
 
 
-@asyncio.coroutine
-def read_request(stream):
+async def read_request(stream):
     """
     Read an HTTP/1.1 request from ``stream``.
 
@@ -49,8 +47,7 @@ def read_request(stream):
     return path, headers
 
 
-@asyncio.coroutine
-def read_response(stream):
+async def read_response(stream):
     """
     Read an HTTP/1.1 response from ``stream``.
 
@@ -69,8 +66,7 @@ def read_response(stream):
     return int(status), headers
 
 
-@asyncio.coroutine
-def read_message(stream):
+async def read_message(stream):
     """
     Read an HTTP message from ``stream``.
 
@@ -94,8 +90,7 @@ def read_message(stream):
     return start_line, headers
 
 
-@asyncio.coroutine
-def read_line(stream):
+async def read_line(stream):
     """
     Read a single line from ``stream``.
 

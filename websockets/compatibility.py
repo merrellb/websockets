@@ -1,4 +1,3 @@
-import asyncio
 
 
 # Replace with BaseEventLoop.create_task when dropping Python < 3.4.2.

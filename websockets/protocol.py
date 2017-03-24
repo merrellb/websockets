@@ -6,7 +6,6 @@ frames as specified in `sections 4 to 8 of RFC 6455`_.
 
 """
 
-import asyncio
 import asyncio.queues
 import codecs
 import collections
@@ -214,8 +213,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         """
         return ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][self.state]
 
-    @asyncio.coroutine
-    def close(self, code=1000, reason=''):
+    async def close(self, code=1000, reason=''):
         """
         This coroutine performs the closing handshake.
 
@@ -245,8 +243,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         # The worker should terminate quickly once it has been cancelled.
         yield from self.worker_task
 
-    @asyncio.coroutine
-    def recv(self):
+    async def recv(self):
         """
         This coroutine receives the next message.
 
@@ -297,8 +294,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
             if not self.legacy_recv:
                 raise ConnectionClosed(self.close_code, self.close_reason)
 
-    @asyncio.coroutine
-    def send(self, data):
+    async def send(self, data):
         """
         This coroutine sends a message.
 
@@ -318,8 +314,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
 
         yield from self.write_frame(opcode, data)
 
-    @asyncio.coroutine
-    def ping(self, data=None):
+    async def ping(self, data=None):
         """
         This coroutine sends a ping.
 
@@ -352,8 +347,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         yield from self.write_frame(OP_PING, data)
         return self.pings[data]
 
-    @asyncio.coroutine
-    def pong(self, data=b''):
+    async def pong(self, data=b''):
         """
         This coroutine sends a pong.
 
@@ -381,8 +375,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         else:
             raise TypeError("data must be bytes or str")
 
-    @asyncio.coroutine
-    def ensure_open(self):
+    async def ensure_open(self):
         # Raise a suitable exception if the connection isn't open.
         # Handle cases from the most common to the least common.
 
@@ -404,8 +397,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         assert self.state == CONNECTING
         raise InvalidState("WebSocket connection isn't established yet.")
 
-    @asyncio.coroutine
-    def run(self):
+    async def run(self):
         # This coroutine guarantees that the connection is closed at exit.
         yield from self.opening_handshake
         while not self.closing_handshake.done():
@@ -429,8 +421,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
                 raise
         yield from self.close_connection()
 
-    @asyncio.coroutine
-    def read_message(self):
+    async def read_message(self):
         # Reassemble fragmented messages.
         frame = yield from self.read_data_frame(max_size=self.max_size)
         if frame is None:
@@ -482,8 +473,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
 
         return ('' if text else b'').join(chunks)
 
-    @asyncio.coroutine
-    def read_data_frame(self, max_size):
+    async def read_data_frame(self, max_size):
         # Deal with control frames automatically and return next data frame.
         # 6.2. Receiving Data
         while True:
@@ -518,8 +508,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
             else:
                 return frame
 
-    @asyncio.coroutine
-    def read_frame(self, max_size):
+    async def read_frame(self, max_size):
         is_masked = not self.is_client
         frame = yield from read_frame(
             self.reader.readexactly, is_masked, max_size=max_size)
@@ -527,8 +516,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         logger.debug("%s << %s", side, frame)
         return frame
 
-    @asyncio.coroutine
-    def write_frame(self, opcode, data=b''):
+    async def write_frame(self, opcode, data=b''):
         # Defensive assertion for protocol compliance.
         if self.state != OPEN:                              # pragma: no cover
             raise InvalidState("Cannot write to a WebSocket "
@@ -570,8 +558,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
             # And raise an exception, since the frame couldn't be sent.
             raise ConnectionClosed(self.close_code, self.close_reason)
 
-    @asyncio.coroutine
-    def close_connection(self, force=False):
+    async def close_connection(self, force=False):
         # 7.1.1. Close the WebSocket Connection
         if self.state == CLOSED:
             return
@@ -607,8 +594,7 @@ class WebSocketCommonProtocol(asyncio.StreamReaderProtocol):
         except (asyncio.CancelledError, asyncio.TimeoutError):
             pass
 
-    @asyncio.coroutine
-    def fail_connection(self, code=1011, reason=''):
+    async def fail_connection(self, code=1011, reason=''):
         # 7.1.7. Fail the WebSocket Connection
         logger.info("Failing the WebSocket connection: %d %s", code, reason)
         if self.state == OPEN:

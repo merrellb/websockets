@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import os
 import ssl
@@ -17,8 +16,7 @@ logging.basicConfig(level=logging.CRITICAL)
 testcert = os.path.join(os.path.dirname(__file__), 'testcert.pem')
 
 
-@asyncio.coroutine
-def handler(ws, path):
+async def handler(ws, path):
     if path == '/attributes':
         yield from ws.send(repr((ws.host, ws.port, ws.secure)))
     elif path == '/headers':
@@ -287,8 +285,7 @@ class ClientServerTests(unittest.TestCase):
 
     @unittest.mock.patch('websockets.client.read_response')
     def test_server_does_not_switch_protocols(self, _read_response):
-        @asyncio.coroutine
-        def wrong_read_response(stream):
+        async def wrong_read_response(stream):
             code, headers = yield from read_response(stream)
             return 400, headers
         _read_response.side_effect = wrong_read_response

@@ -2,7 +2,6 @@ import json
 import logging
 import urllib.parse
 
-import asyncio
 import websockets
 
 
@@ -22,16 +21,14 @@ class EchoClientProtocol(websockets.WebSocketClientProtocol):
         kwargs['max_size'] = 2 ** 25
         super().__init__(*args, **kwargs)
 
-    @asyncio.coroutine
-    def read_message(self):
+    async def read_message(self):
         msg = yield from super().read_message()
         if msg is not None:
             yield from self.send(msg)
         return msg
 
 
-@asyncio.coroutine
-def get_case_count(server):
+async def get_case_count(server):
     uri = server + '/getCaseCount'
     ws = yield from websockets.connect(uri)
     msg = yield from ws.recv()
@@ -39,22 +36,19 @@ def get_case_count(server):
     return json.loads(msg)
 
 
-@asyncio.coroutine
-def run_case(server, case, agent):
+async def run_case(server, case, agent):
     uri = server + '/runCase?case={}&agent={}'.format(case, agent)
     ws = yield from websockets.connect(uri, klass=EchoClientProtocol)
     yield from ws.worker_task
 
 
-@asyncio.coroutine
-def update_reports(server, agent):
+async def update_reports(server, agent):
     uri = server + '/updateReports?agent={}'.format(agent)
     ws = yield from websockets.connect(uri)
     yield from ws.close()
 
 
-@asyncio.coroutine
-def run_tests(server, agent):
+async def run_tests(server, agent):
     cases = yield from get_case_count(server)
     for case in range(1, cases + 1):
         print("Running test case {} out of {}".format(case, cases), end="\r")

@@ -1,6 +1,5 @@
 import logging
 
-import asyncio
 import websockets
 
 
@@ -17,16 +16,14 @@ class EchoServerProtocol(websockets.WebSocketServerProtocol):
         kwargs['max_size'] = 2 ** 25
         super().__init__(*args, **kwargs)
 
-    @asyncio.coroutine
-    def read_message(self):
+    async def read_message(self):
         msg = yield from super().read_message()
         if msg is not None:
             yield from self.send(msg)
         return msg
 
 
-@asyncio.coroutine
-def noop(ws, path):
+async def noop(ws, path):
     yield from ws.worker_task
 
 

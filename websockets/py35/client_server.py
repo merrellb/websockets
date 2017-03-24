@@ -1,7 +1,6 @@
 # Tests containing Python 3.5+ syntax, extracted from test_client_server.py.
 # To avoid test discovery, this module's name must not start with test_.
 
-import asyncio
 
 from ..client import *
 from ..server import *

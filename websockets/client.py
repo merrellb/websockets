@@ -3,7 +3,6 @@ The :mod:`websockets.client` module defines a simple WebSocket client API.
 
 """
 
-import asyncio
 import collections.abc
 import email.message
 
@@ -28,8 +27,7 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
     is_client = True
     state = CONNECTING
 
-    @asyncio.coroutine
-    def handshake(self, wsuri,
+    async def handshake(self, wsuri,
                   origin=None, subprotocols=None, extra_headers=None):
         """
         Perform the client side of the opening handshake.
@@ -99,8 +97,7 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
         self.opening_handshake.set_result(True)
 
 
-@asyncio.coroutine
-def connect(uri, *,
+async def connect(uri, *,
             klass=WebSocketClientProtocol,
             timeout=10, max_size=2 ** 20, max_queue=2 ** 5,
             loop=None, legacy_recv=False,

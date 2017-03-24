@@ -3,7 +3,6 @@ The :mod:`websockets.server` module defines a simple WebSocket server API.
 
 """
 
-import asyncio
 import collections.abc
 import email.message
 import logging
@@ -52,8 +51,7 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         self.handler_task = asyncio_ensure_future(
             self.handler(), loop=self.loop)
 
-    @asyncio.coroutine
-    def handler(self):
+    async def handler(self):
         # Since this method doesn't have a caller able to handle exceptions,
         # it attemps to log relevant ones and close the connection properly.
         try:
@@ -120,8 +118,7 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
             self.ws_server.closing
         )
 
-    @asyncio.coroutine
-    def handshake(self, origins=None, subprotocols=None, extra_headers=None):
+    async def handshake(self, origins=None, subprotocols=None, extra_headers=None):
         """
         Perform the server side of the opening handshake.
 
@@ -264,8 +261,7 @@ class WebSocketServer(asyncio.AbstractServer):
         for websocket in self.websockets:
             websocket.handler_task.cancel()
 
-    @asyncio.coroutine
-    def wait_closed(self):
+    async def wait_closed(self):
         """
         Wait until all connections are closed.
 
@@ -283,8 +279,7 @@ class WebSocketServer(asyncio.AbstractServer):
         yield from self.server.wait_closed()
 
 
-@asyncio.coroutine
-def serve(ws_handler, host=None, port=None, *,
+async def serve(ws_handler, host=None, port=None, *,
           klass=WebSocketServerProtocol,
           timeout=10, max_size=2 ** 20, max_queue=2 ** 5,
           loop=None, legacy_recv=False,

@@ -1,4 +1,3 @@
-import asyncio
 import contextlib
 import functools
 import os
@@ -86,8 +85,7 @@ class CommonTests:
 
         original_drain = self.protocol.writer.drain
 
-        @asyncio.coroutine
-        def delayed_drain():
+        async def delayed_drain():
             yield from asyncio.sleep(3 * MS, loop=self.loop)
             yield from original_drain()
 
@@ -339,8 +337,7 @@ class CommonTests:
         self.assertEqual(data, b'tea' * 342)
 
     def test_recv_other_error(self):
-        @asyncio.coroutine
-        def read_message():
+        async def read_message():
             raise Exception("BOOM")
         self.protocol.read_message = read_message
         self.process_invalid_frames()

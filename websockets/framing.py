@@ -9,7 +9,6 @@ of frames is implemented in :mod:`websockets.protocol`.
 
 """
 
-import asyncio
 import collections
 import io
 import random
@@ -57,8 +56,7 @@ length and masking-key are handled on the fly by :func:`read_frame` and
 """
 
 
-@asyncio.coroutine
-def read_frame(reader, mask, *, max_size=None):
+async def read_frame(reader, mask, *, max_size=None):
     """
     Read a WebSocket frame and return a :class:`Frame` object.
 
