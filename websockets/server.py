@@ -57,7 +57,7 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         try:
 
             try:
-                path = yield from self.handshake(
+                path = await self.handshake(
                     origins=self.origins, subprotocols=self.subprotocols,
                     extra_headers=self.extra_headers)
             except Exception as exc:
@@ -76,17 +76,17 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
                 raise
 
             try:
-                yield from self.ws_handler(self, path)
+                await self.ws_handler(self, path)
             except Exception as exc:
                 if self._is_server_shutting_down(exc):
-                    yield from self.fail_connection(1001)
+                    await self.fail_connection(1001)
                 else:
                     logger.error("Error in connection handler", exc_info=True)
-                    yield from self.fail_connection(1011)
+                    await self.fail_connection(1011)
                 raise
 
             try:
-                yield from self.close()
+                await self.close()
             except Exception as exc:
                 if self._is_server_shutting_down(exc):
                     pass
@@ -137,7 +137,7 @@ class WebSocketServerProtocol(WebSocketCommonProtocol):
         """
         # Read handshake request.
         try:
-            path, headers = yield from read_request(self.reader)
+            path, headers = await read_request(self.reader)
         except ValueError as exc:
             raise InvalidHandshake("Malformed HTTP message") from exc
 
@@ -272,11 +272,11 @@ class WebSocketServer(asyncio.AbstractServer):
         if self.websockets:
             # The handler or the worker task can terminate first, depending
             # on how the client behaves and the server is implemented.
-            yield from asyncio.wait(
+            await asyncio.wait(
                 [websocket.handler_task for websocket in self.websockets] +
                 [websocket.worker_task for websocket in self.websockets],
                 loop=self.loop)
-        yield from self.server.wait_closed()
+        await self.server.wait_closed()
 
 
 async def serve(ws_handler, host=None, port=None, *,
@@ -349,7 +349,7 @@ async def serve(ws_handler, host=None, port=None, *,
         origins=origins, subprotocols=subprotocols,
         extra_headers=extra_headers,
     )
-    server = yield from loop.create_server(factory, host, port, **kwds)
+    server = await loop.create_server(factory, host, port, **kwds)
 
     ws_server.wrap(server)
 

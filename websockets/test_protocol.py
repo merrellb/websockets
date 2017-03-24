@@ -86,8 +86,8 @@ class CommonTests:
         original_drain = self.protocol.writer.drain
 
         async def delayed_drain():
-            yield from asyncio.sleep(3 * MS, loop=self.loop)
-            yield from original_drain()
+            await asyncio.sleep(3 * MS, loop=self.loop)
+            await original_drain()
 
         self.protocol.writer.drain = delayed_drain
 

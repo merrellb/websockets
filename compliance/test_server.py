@@ -17,14 +17,14 @@ class EchoServerProtocol(websockets.WebSocketServerProtocol):
         super().__init__(*args, **kwargs)
 
     async def read_message(self):
-        msg = yield from super().read_message()
+        msg = await super().read_message()
         if msg is not None:
-            yield from self.send(msg)
+            await self.send(msg)
         return msg
 
 
 async def noop(ws, path):
-    yield from ws.worker_task
+    await ws.worker_task
 
 
 start_server = websockets.serve(noop, '127.0.0.1', 8642, klass=EchoServerProtocol)

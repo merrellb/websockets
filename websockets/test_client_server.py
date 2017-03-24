@@ -18,17 +18,17 @@ testcert = os.path.join(os.path.dirname(__file__), 'testcert.pem')
 
 async def handler(ws, path):
     if path == '/attributes':
-        yield from ws.send(repr((ws.host, ws.port, ws.secure)))
+        await ws.send(repr((ws.host, ws.port, ws.secure)))
     elif path == '/headers':
-        yield from ws.send(str(ws.request_headers))
-        yield from ws.send(str(ws.response_headers))
+        await ws.send(str(ws.request_headers))
+        await ws.send(str(ws.response_headers))
     elif path == '/raw_headers':
-        yield from ws.send(repr(ws.raw_request_headers))
-        yield from ws.send(repr(ws.raw_response_headers))
+        await ws.send(repr(ws.raw_request_headers))
+        await ws.send(repr(ws.raw_response_headers))
     elif path == '/subprotocol':
-        yield from ws.send(repr(ws.subprotocol))
+        await ws.send(repr(ws.subprotocol))
     else:
-        yield from ws.send((yield from ws.recv()))
+        await ws.send((await ws.recv()))
 
 
 class ClientServerTests(unittest.TestCase):
@@ -286,7 +286,7 @@ class ClientServerTests(unittest.TestCase):
     @unittest.mock.patch('websockets.client.read_response')
     def test_server_does_not_switch_protocols(self, _read_response):
         async def wrong_read_response(stream):
-            code, headers = yield from read_response(stream)
+            code, headers = await read_response(stream)
             return 400, headers
         _read_response.side_effect = wrong_read_response
 

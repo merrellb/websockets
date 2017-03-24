@@ -74,7 +74,7 @@ class WebSocketClientProtocol(WebSocketCommonProtocol):
 
         # Read handshake response.
         try:
-            status_code, headers = yield from read_response(self.reader)
+            status_code, headers = await read_response(self.reader)
         except ValueError as exc:
             raise InvalidHandshake("Malformed HTTP message") from exc
         if status_code != 101:
@@ -153,15 +153,15 @@ async def connect(uri, *,
         loop=loop, legacy_recv=legacy_recv,
     )
 
-    transport, protocol = yield from loop.create_connection(
+    transport, protocol = await loop.create_connection(
         factory, wsuri.host, wsuri.port, **kwds)
 
     try:
-        yield from protocol.handshake(
+        await protocol.handshake(
             wsuri, origin=origin, subprotocols=subprotocols,
             extra_headers=extra_headers)
     except Exception:
-        yield from protocol.close_connection(force=True)
+        await protocol.close_connection(force=True)
         raise
 
     return protocol

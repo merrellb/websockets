@@ -16,6 +16,6 @@ class Connect:
         await self.websocket.close()
 
     def __await__(self):
-        return (yield from self.client)
+        return (await self.client)
 
     __iter__ = __await__

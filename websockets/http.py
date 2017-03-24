@@ -38,7 +38,7 @@ async def read_request(stream):
     The request is assumed not to contain a body.
 
     """
-    request_line, headers = yield from read_message(stream)
+    request_line, headers = await read_message(stream)
     method, path, version = request_line[:-2].decode().split(None, 2)
     if method != 'GET':
         raise ValueError("Unsupported method")
@@ -59,7 +59,7 @@ async def read_response(stream):
     The response is assumed not to contain a body.
 
     """
-    status_line, headers = yield from read_message(stream)
+    status_line, headers = await read_message(stream)
     version, status, reason = status_line[:-2].decode().split(" ", 2)
     if version != 'HTTP/1.1':
         raise ValueError("Unsupported HTTP version")
@@ -76,10 +76,10 @@ async def read_message(stream):
     The message is assumed not to contain a body.
 
     """
-    start_line = yield from read_line(stream)
+    start_line = await read_line(stream)
     header_lines = io.BytesIO()
     for num in range(MAX_HEADERS):
-        header_line = yield from read_line(stream)
+        header_line = await read_line(stream)
         header_lines.write(header_line)
         if header_line == b'\r\n':
             break
@@ -95,7 +95,7 @@ async def read_line(stream):
     Read a single line from ``stream``.
 
     """
-    line = yield from stream.readline()
+    line = await stream.readline()
     if len(line) > MAX_LINE:
         raise ValueError("Line too long")
     if not line.endswith(b'\r\n'):

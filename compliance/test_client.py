@@ -22,39 +22,39 @@ class EchoClientProtocol(websockets.WebSocketClientProtocol):
         super().__init__(*args, **kwargs)
 
     async def read_message(self):
-        msg = yield from super().read_message()
+        msg = await super().read_message()
         if msg is not None:
-            yield from self.send(msg)
+            await self.send(msg)
         return msg
 
 
 async def get_case_count(server):
     uri = server + '/getCaseCount'
-    ws = yield from websockets.connect(uri)
-    msg = yield from ws.recv()
-    yield from ws.close()
+    ws = await websockets.connect(uri)
+    msg = await ws.recv()
+    await ws.close()
     return json.loads(msg)
 
 
 async def run_case(server, case, agent):
     uri = server + '/runCase?case={}&agent={}'.format(case, agent)
-    ws = yield from websockets.connect(uri, klass=EchoClientProtocol)
-    yield from ws.worker_task
+    ws = await websockets.connect(uri, klass=EchoClientProtocol)
+    await ws.worker_task
 
 
 async def update_reports(server, agent):
     uri = server + '/updateReports?agent={}'.format(agent)
-    ws = yield from websockets.connect(uri)
-    yield from ws.close()
+    ws = await websockets.connect(uri)
+    await ws.close()
 
 
 async def run_tests(server, agent):
-    cases = yield from get_case_count(server)
+    cases = await get_case_count(server)
     for case in range(1, cases + 1):
         print("Running test case {} out of {}".format(case, cases), end="\r")
-        yield from run_case(server, case, agent)
+        await run_case(server, case, agent)
     print("Ran {} test cases               ".format(cases))
-    yield from update_reports(server, agent)
+    await update_reports(server, agent)
 
 
 main = run_tests(SERVER, urllib.parse.quote(AGENT))
